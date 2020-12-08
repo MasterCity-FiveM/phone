@@ -27,12 +27,12 @@ function notifyAlertSMS (number, alert, listSrc)
     for k, _ in pairs(listSrc) do
       getPhoneNumber(tonumber(k), function (n)
         if n ~= nil then
-          
-          TriggerEvent('gcPhone:_internalAddMessage', number, n, 'From #' .. alert.numero  .. ' : ' .. alert.message, 0, function (smsMess)
+
+			TriggerEvent('gcPhone:_internalAddMessage', number, n, 'From #' .. alert.numero  .. ' : ' .. alert.message, 0, function (smsMess)
             TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess)
             TriggerEvent('gcPhone:_internalAddMessage', number, n, 'GPS: ' .. alert.coords.x .. ', ' .. alert.coords.y, 0, function (smsMess)
-            TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess)
-          end)
+              TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess)
+            end)
           end)
         end
       end)
@@ -41,7 +41,7 @@ function notifyAlertSMS (number, alert, listSrc)
 end
 
 AddEventHandler('esx_phone:registerNumber', function(number, type, sharePos, hasDispatch, hideNumber, hidePosIfAnon)
-  print('==== Enregistrement du telephone ' .. number .. ' => ' .. type)
+  -- print('==== Enregistrement du telephone ' .. number .. ' => ' .. type)
 	local hideNumber    = hideNumber    or false
 	local hidePosIfAnon = hidePosIfAnon or false
 
@@ -95,8 +95,8 @@ AddEventHandler('esx_addons_gcphone:startCall', function (number, message, coord
         numero = phone,
       }, PhoneNumbers[number].sources)
     end)
-  else
-    print('Appels sur un service non enregistre => numero : ' .. number)
+  -- else
+  --   print('Appels sur un service non enregistre => numero : ' .. number)
   end
 end)
 
@@ -105,7 +105,7 @@ AddEventHandler('esx:playerLoaded', function(source)
 
   local xPlayer = ESX.GetPlayerFromId(source)
 
-  MySQL.Async.fetchAll('SELECT * FROM users WHERE identifier = @identifier',{
+  MySQL.Async.fetchAll('SELECT phone_number FROM users WHERE identifier = @identifier',{
     ['@identifier'] = xPlayer.identifier
   }, function(result)
 
@@ -134,14 +134,17 @@ function getPhoneNumber (source, callback)
   if xPlayer == nil then
     callback(nil)
   end
-  MySQL.Async.fetchAll('SELECT * FROM users WHERE identifier = @identifier',{
-    ['@identifier'] = xPlayer.identifier
-  }, function(result)
-    callback(result[1].phone_number)
-  end)
+
+  if xPlayer.phoneNumber == nil then
+    MySQL.Async.fetchAll('SELECT phone_number FROM users WHERE identifier = @identifier',{
+      ['@identifier'] = xPlayer.identifier
+    }, function(result)
+      callback(result[1].phone_number)
+    end)
+  else
+    callback(xPlayer.phoneNumber)
+  end
 end
-
-
 
 RegisterServerEvent('esx_phone:send')
 AddEventHandler('esx_phone:send', function(number, message, _, coords)
@@ -154,7 +157,7 @@ AddEventHandler('esx_phone:send', function(number, message, _, coords)
         numero = phone,
       }, PhoneNumbers[number].sources)
     end)
-  else
-    -- print('esx_phone:send | Appels sur un service non enregistre => numero : ' .. number)
+  -- else
+  -- print('esx_phone:send | Appels sur un service non enregistre => numero : ' .. number)
   end
 end)

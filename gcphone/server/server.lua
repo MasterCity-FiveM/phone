@@ -5,15 +5,46 @@
 ESX = nil
 
 TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+identifierPhones = {}
+PhoneIdentifier = {}
 
 math.randomseed(os.time()) 
 
 --- Pour les numero du style XXX-XXXX
+-- function getPhoneRandomNumber()
+--     local numBase0 = math.random(100,999)
+--     local numBase1 = math.random(0,9999)
+--     local num = string.format("%03d-%04d", numBase0, numBase1)
+
+-- 	return num
+-- end
+
 function getPhoneRandomNumber()
     local numBase0 = math.random(100,999)
-    local numBase1 = math.random(0,9999)
-    local num = string.format("%03d-%04d", numBase0, numBase1)
-
+    local numBase1 = math.random(1000,9999)
+	local numBase3 = math.random(30,45)
+	
+	if numBase3 == 34 then 
+		numBase3 = 10
+	elseif numBase3 == 40 then 
+		numBase3 = 12
+	elseif numBase3 == 41 then 
+		numBase3 = 13
+	elseif numBase3 == 42 then 
+		numBase3 = 14
+	elseif numBase3 == 43 then 
+		numBase3 = 17
+	elseif numBase3 == 44 then 
+		numBase3 = 15
+	elseif numBase3 == 45 then 
+		numBase3 = 19
+	elseif numBase3 == 46 then 
+		numBase3 = 20
+	elseif numBase3 == 47 then 
+		numBase3 = 21
+	end
+		
+    local num = string.format("09%02d%03d%04d", numBase3, numBase0, numBase1)
 	return num
 end
 
@@ -59,21 +90,34 @@ function getSourceFromIdentifier(identifier, cb)
 end
 
 function getNumberPhone(identifier)
-    local result = MySQL.Sync.fetchAll("SELECT users.phone_number FROM users WHERE users.identifier = @identifier", {
-        ['@identifier'] = identifier
-    })
-    if result[1] ~= nil then
-        return result[1].phone_number
+    if identifierPhones[identifier] ~= nil then
+        return identifierPhones[identifier]
+    else
+        local result = MySQL.Sync.fetchAll("SELECT users.phone_number FROM users WHERE users.identifier = @identifier", {
+            ['@identifier'] = identifier
+        })
+        if result[1] ~= nil and result[1].phone_number ~= nil then
+            identifierPhones[identifier] = result[1].phone_number
+            return result[1].phone_number
+        end
     end
+    
     return nil
 end
+
 function getIdentifierByPhoneNumber(phone_number) 
-    local result = MySQL.Sync.fetchAll("SELECT users.identifier FROM users WHERE users.phone_number = @phone_number", {
-        ['@phone_number'] = phone_number
-    })
-    if result[1] ~= nil then
-        return result[1].identifier
+    if PhoneIdentifier[phone_number] ~= nil then
+        return PhoneIdentifier[phone_number]
+    else
+        local result = MySQL.Sync.fetchAll("SELECT users.identifier FROM users WHERE users.phone_number = @phone_number", {
+            ['@phone_number'] = phone_number
+        })
+        if result[1] ~= nil and result[1].identifier ~= nil then
+            PhoneIdentifier[phone_number] = result[1].identifier
+            return result[1].identifier
+        end
     end
+    
     return nil
 end
 
@@ -105,14 +149,32 @@ end
 --  Contacts
 --====================================================================================
 function getContacts(identifier)
-    local result = MySQL.Sync.fetchAll("SELECT * FROM phone_users_contacts WHERE phone_users_contacts.identifier = @identifier", {
+    local result = MySQL.Sync.fetchAll("SELECT * FROM phone_users_contacts WHERE phone_users_contacts.identifier = @identifier limit 10", {
         ['@identifier'] = identifier
     })
     return result
 end
 
+function getContactsCount(identifier)
+    local result = MySQL.Sync.fetchAll("SELECT COUNT(id) as contacts FROM phone_users_contacts WHERE phone_users_contacts.identifier = @identifier", {
+        ['@identifier'] = identifier
+    })
+
+    if result[1] ~= nil and result[1].contacts ~= nil then
+        return result[1].contacts
+    end
+
+    return 0
+end
+
 function addContact(source, identifier, number, display)
     local sourcePlayer = tonumber(source)
+
+    if getContactsCount(identifier) >= 10 then
+        TriggerClientEvent("pNotify:SendNotification", source, { text = "حداکثر تعداد مخاطب قابل ثبت توسظ شما 10 مخاطب می باشد.", type = "error", timeout = 3000, layout = "bottomCenter"})
+        return false
+    end
+
     MySQL.Async.insert("INSERT INTO phone_users_contacts (`identifier`, `number`,`display`) VALUES(@identifier, @number, @display)", {
         ['@identifier'] = identifier,
         ['@number'] = number,
@@ -199,7 +261,33 @@ AddEventHandler('gcPhone:_internalAddMessage', function(transmitter, receiver, m
     cb(_internalAddMessage(transmitter, receiver, message, owner))
 end)
 
+function getMessagesCount(phone)
+    local result = MySQL.Sync.fetchAll("SELECT COUNT(id) as messages FROM phone_messages WHERE receiver = @receiver OR transmitter = @transmitter", {
+        ['@receiver'] = phone,
+        ['@transmitter'] = phone,
+    })
+
+    if result[1] ~= nil and result[1].messages ~= nil then
+        return result[1].messages
+    end
+
+    return 0
+end
+
+function DeleteOldestMessages(phone)
+    local messages_count = getMessagesCount(phone)
+    if messages_count > 20 then
+        local mustbedelete = messages_count - 20
+        MySQL.Sync.fetchAll("DELETE FROM phone_messages WHERE receiver = @receiver OR transmitter = @transmitter LIMIT " .. mustbedelete .. " ORDER by id ASC", {
+            ['@receiver'] = phone,
+            ['@transmitter'] = phone,
+        })
+    end
+end
+
 function _internalAddMessage(transmitter, receiver, message, owner)
+    DeleteOldestMessages(transmitter)
+    DeleteOldestMessages(receiver)
     local Query = "INSERT INTO phone_messages (`transmitter`, `receiver`,`message`, `isRead`,`owner`) VALUES(@transmitter, @receiver, @message, @isRead, @owner);"
     local Query2 = 'SELECT * from phone_messages WHERE `id` = @id;'
 	local Parameters = {
@@ -333,8 +421,36 @@ function sendHistoriqueCall (src, num)
     TriggerClientEvent('gcPhone:historiqueCall', src, histo)
 end
 
+function getCallsCount(phone)
+    local result = MySQL.Sync.fetchAll("SELECT COUNT(id) as calls FROM phone_calls WHERE owner = @owner OR num = @num", {
+        ['@owner'] = phone,
+        ['@num'] = phone,
+    })
+
+    if result[1] ~= nil and result[1].calls ~= nil then
+        return result[1].calls
+    end
+
+    return 0
+end
+
+function DeleteOldestCalls(phone)
+    local calls_count = getCallsCount(phone)
+    if calls_count > 20 then
+        local mustbedelete = calls_count - 20
+        MySQL.Sync.fetchAll("DELETE FROM phone_calls WHERE owner = @owner OR num = @num LIMIT " .. mustbedelete .. " ORDER by id ASC", {
+            ['@owner'] = phone,
+            ['@num'] = phone,
+        })
+    end
+end
+
 function saveAppels (appelInfo)
     if appelInfo.extraData == nil or appelInfo.extraData.useNumber == nil then
+        
+        DeleteOldestCalls(appelInfo.transmitter_num)
+        DeleteOldestCalls(appelInfo.receiver_num)
+
         MySQL.Async.insert("INSERT INTO phone_calls (`owner`, `num`,`incoming`, `accepts`) VALUES(@owner, @num, @incoming, @accepts)", {
             ['@owner'] = appelInfo.transmitter_num,
             ['@num'] = appelInfo.receiver_num,
@@ -349,6 +465,10 @@ function saveAppels (appelInfo)
         if appelInfo.hidden == true then
             num = "###-####"
         end
+
+        DeleteOldestCalls(appelInfo.receiver_num)
+        DeleteOldestCalls(num)
+
         MySQL.Async.insert("INSERT INTO phone_calls (`owner`, `num`,`incoming`, `accepts`) VALUES(@owner, @num, @incoming, @accepts)", {
             ['@owner'] = appelInfo.receiver_num,
             ['@num'] = num,
@@ -385,7 +505,7 @@ AddEventHandler('gcPhone:internal_startCall', function(source, phone_number, rtc
     
     local rtcOffer = rtcOffer
     if phone_number == nil or phone_number == '' then 
-        print('BAD CALL NUMBER IS NIL')
+        -- print('BAD CALL NUMBER IS NIL')
         return
     end
 
