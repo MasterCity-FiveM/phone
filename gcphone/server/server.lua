@@ -58,19 +58,21 @@ end
   Un solution ESC basé sur la solution donnée par HalCroves
   https://forum.fivem.net/t/tutorial-for-gcphone-with-call-and-job-message-other/177904
 --]]
---[[
- ESX.RegisterServerCallback('gcphone:getItemAmount', function(source, cb, item)
-	print('gcphone:getItemAmount call item : ' .. item)
-	local xPlayer = ESX.GetPlayerFromId(source)
-        local items = xPlayer.getInventoryItem(item)
+function GetItemCount(source, item)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    local items = xPlayer.getInventoryItem(item)
 
-        if items == nil then
-            cb(0)
-        else
-            cb(items.count)
-        end
+    if items == nil then
+        return 0
+    else
+        return items.count
+    end
+end
+
+ ESX.RegisterServerCallback('gcphone:getItemAmount', function(source, cb, item)
+	-- print('gcphone:getItemAmount call item : ' .. item)
+    cb(GetItemCount(source, item))
 end)
---]]
 
 --====================================================================================
 --  Utils
@@ -171,7 +173,7 @@ function addContact(source, identifier, number, display)
     local sourcePlayer = tonumber(source)
 
     if getContactsCount(identifier) >= 10 then
-        TriggerClientEvent("pNotify:SendNotification", source, { text = "حداکثر تعداد مخاطب قابل ثبت توسظ شما 10 مخاطب می باشد.", type = "error", timeout = 3000, layout = "bottomCenter"})
+        TriggerClientEvent("pNotify:SendNotification", source, { text = "حداکثر تعداد مخاطب قابل ثبت توسظ شما 10 مخاطب می باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
         return false
     end
 
@@ -304,20 +306,27 @@ function _internalAddMessage(transmitter, receiver, message, owner)
 end
 
 function addMessage(source, identifier, phone_number, message)
-    local sourcePlayer = tonumber(source)
-    local otherIdentifier = getIdentifierByPhoneNumber(phone_number)
-    local myPhone = getNumberPhone(identifier)
-    if otherIdentifier ~= nil then 
-        local tomess = _internalAddMessage(myPhone, phone_number, message, 0)
-        getSourceFromIdentifier(otherIdentifier, function (osou)
-            if tonumber(osou) ~= nil then 
-                -- TriggerClientEvent("gcPhone:allMessage", osou, getMessages(otherIdentifier))
-                TriggerClientEvent("gcPhone:receiveMessage", tonumber(osou), tomess)
-            end
-        end) 
+    if GetItemCount(source, 'cartcharge') >= 16 then
+	    xPlayer = ESX.GetPlayerFromId(source)
+        xPlayer.removeInventoryItem('cartcharge', 16)
+        
+        local sourcePlayer = tonumber(source)
+        local otherIdentifier = getIdentifierByPhoneNumber(phone_number)
+        local myPhone = getNumberPhone(identifier)
+        if otherIdentifier ~= nil then
+            local tomess = _internalAddMessage(myPhone, phone_number, message, 0)
+            getSourceFromIdentifier(otherIdentifier, function (osou)
+                if tonumber(osou) ~= nil then 
+                    -- TriggerClientEvent("gcPhone:allMessage", osou, getMessages(otherIdentifier))
+                    TriggerClientEvent("gcPhone:receiveMessage", tonumber(osou), tomess)
+                end
+            end)
+        end
+        local memess = _internalAddMessage(phone_number, myPhone, message, 1)
+        TriggerClientEvent("gcPhone:receiveMessage", sourcePlayer, memess)
+    else
+        TriggerClientEvent("pNotify:SendNotification", source, { text = "شارژ سیم‌کارت کافی نیست، لطفا ابتدا کارت شارژ خریداری کنید.", type = "error", timeout = 4000, layout = "bottomCenter"})
     end
-    local memess = _internalAddMessage(phone_number, myPhone, message, 1)
-    TriggerClientEvent("gcPhone:receiveMessage", sourcePlayer, memess)
 end
 
 function setReadMessageNumber(identifier, num)
@@ -542,23 +551,29 @@ AddEventHandler('gcPhone:internal_startCall', function(source, phone_number, rtc
         extraData = extraData
     }
 
-    if is_valid == true then
-        getSourceFromIdentifier(destPlayer, function (srcTo)
-            if srcTo ~= nill then
-                AppelsEnCours[indexCall].receiver_src = srcTo
-                TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
-                TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
-                TriggerClientEvent('gcPhone:waitingCall', srcTo, AppelsEnCours[indexCall], false)
-            else
-                TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
-                TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
-            end
-        end)
+    if GetItemCount(source, 'cartcharge') >= 100 then
+        if is_valid == true then
+            getSourceFromIdentifier(destPlayer, function (srcTo)
+                if srcTo ~= nill then
+                    xPlayer.removeInventoryItem('cartcharge', 100)
+                    AppelsEnCours[indexCall].receiver_src = srcTo
+                    TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
+                    TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
+                    TriggerClientEvent('gcPhone:waitingCall', srcTo, AppelsEnCours[indexCall], false)
+                else
+                    TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
+                    TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
+                end
+            end)
+        else
+            TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
+            TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
+        end
     else
+        TriggerClientEvent("pNotify:SendNotification", source, { text = "شارژ سیم‌کارت کافی نیست، لطفا ابتدا کارت شارژ خریداری کنید.", type = "error", timeout = 4000, layout = "bottomCenter"})
         TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
         TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
     end
-
 end)
 
 RegisterServerEvent('gcPhone:startCall')
@@ -683,6 +698,7 @@ AddEventHandler('gcPhone:allUpdate', function()
     end
     local identifier = xPlayer.identifier
     local num = getNumberPhone(identifier)
+    
     TriggerClientEvent("gcPhone:myPhoneNumber", sourcePlayer, num)
     TriggerClientEvent("gcPhone:contactList", sourcePlayer, getContacts(identifier))
     TriggerClientEvent("gcPhone:allMessage", sourcePlayer, getMessages(identifier))

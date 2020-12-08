@@ -32,10 +32,10 @@ local soundDistanceMax = 8.0
 --====================================================================================
 --  Check si le joueurs poséde un téléphone
 --  Callback true or false
---====================================================================================
-function hasPhone (cb)
-  cb(true)
-end
+-- --====================================================================================
+-- function hasPhone (cb)
+--   cb(true)
+-- end
 --====================================================================================
 --  Que faire si le joueurs veut ouvrir sont téléphone n'est qu'il en a pas ?
 --====================================================================================
@@ -56,17 +56,25 @@ Citizen.CreateThread(function()
     Citizen.Wait(0)
   end
 end)
---[[
+
 function hasPhone (cb)
   if (ESX == nil) then return cb(0) end
   ESX.TriggerServerCallback('gcphone:getItemAmount', function(qtty)
     cb(qtty > 0)
   end, 'phone')
 end
+
+function HasBalance (cb)
+  if (ESX == nil) then return cb(0) end
+  ESX.TriggerServerCallback('gcphone:getItemAmount', function(qtty)
+    cb(qtty)
+  end, 'cartcharge')
+end
+
 function ShowNoPhoneWarning () 
   if (ESX == nil) then return end
-  ESX.ShowNotification("Vous n'avez pas de ~r~téléphone~s~")
-end --]] 
+  exports.pNotify:SendNotification({text = "شما گوشی ندارید!", type = "info", timeout = 4000})
+end 
 
 AddEventHandler('esx:onPlayerDeath', function()
   if menuIsOpen then
@@ -82,11 +90,29 @@ end)
 --====================================================================================
 --  
 --====================================================================================
+
+
+function IsCar()
+	local ped = PlayerPedId()
+	local car = GetVehiclePedIsIn(ped)
+	
+	if car == 0 then
+	  return false
+	end
+  
+	local vc = GetVehicleClass(car)
+	return (vc >= 0 and vc <= 7) or (vc >= 9 and vc <= 12) or (vc >= 17 and vc <= 20)
+end
+
+
 Citizen.CreateThread(function()
   while true do
     Citizen.Wait(0)
     if not menuIsOpen and isDead then
       DisableControlAction(0, 288, true)
+      if not IsCar() then
+        DisplayRadar(false)
+      end
     end
     if takePhoto ~= true then
       if IsControlJustPressed(1, Config.KeyOpenClose) then
@@ -99,6 +125,10 @@ Citizen.CreateThread(function()
         end)
       end
       if menuIsOpen == true then
+        if not IsCar() then
+          DisplayRadar(true)
+        end
+
         for _, value in ipairs(KeyToucheCloseEvent) do
           if IsControlJustPressed(1, value.code) then
             SendNUIMessage({keyUp = value.event})
@@ -617,8 +647,6 @@ RegisterNUICallback('deleteALL', function(data, cb)
   cb()
 end)
 
-
-
 function TooglePhone() 
   menuIsOpen = not menuIsOpen
   SendNUIMessage({show = menuIsOpen})
@@ -641,9 +669,6 @@ RegisterNUICallback('closePhone', function(data, cb)
   PhonePlayOut()
   cb()
 end)
-
-
-
 
 ----------------------------------
 ---------- GESTION APPEL ---------

@@ -20,7 +20,6 @@ files {
 	'html/static/img/coque/grey.png',
 	'html/static/img/coque/pink.png',
 	'html/static/img/coque/no_cover.png',
-
 	
 	-- Background
 	'html/static/img/background/back001.jpg',
@@ -82,9 +81,7 @@ client_script {
 	"client/animation.lua",
 	"client/client.lua",
 	"client/photo.lua",
-	"client/app_tchat.lua",
-	"client/bank.lua",
-	"client/twitter.lua"
+	"client/bank.lua"
 }
 
 server_script {
@@ -93,7 +90,5 @@ server_script {
 	"locales/en.lua",
 	"locales/es.lua",
 	"config.lua",
-	"server/server.lua",
-	"server/app_tchat.lua",
-	"server/twitter.lua",
+	"server/server.lua"
 }
