@@ -76,7 +76,6 @@ files {
 client_script {
 	"@es_extended/locale.lua",
 	"locales/en.lua",
-	"locales/es.lua",
 	"config.lua",
 	"client/animation.lua",
 	"client/client.lua",
@@ -88,7 +87,6 @@ server_script {
 	"@mysql-async/lib/MySQL.lua",
 	"@es_extended/locale.lua",
 	"locales/en.lua",
-	"locales/es.lua",
 	"config.lua",
 	"server/server.lua"
 }
