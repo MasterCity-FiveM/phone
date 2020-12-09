@@ -11,14 +11,22 @@ PhoneIdentifier = {}
 math.randomseed(os.time()) 
 
 --- Pour les numero du style XXX-XXXX
--- function getPhoneRandomNumber()
---     local numBase0 = math.random(100,999)
---     local numBase1 = math.random(0,9999)
---     local num = string.format("%03d-%04d", numBase0, numBase1)
+--[[ 
+function getPhoneRandomNumber()
+     local numBase0 = math.random(100,999)
+     local numBase1 = math.random(0,9999)
+     local num = string.format("%03d", numBase0, numBase1)
+ 	return num
+end
+]] --
 
--- 	return num
--- end
+function getPhoneRandomNumber()
+     local numBase0 = math.random(10000,99999)
+     local num = string.format("%03d", numBase0)
+ 	return num
+end
 
+--[[
 function getPhoneRandomNumber()
     local numBase0 = math.random(100,999)
     local numBase1 = math.random(1000,9999)
@@ -46,7 +54,7 @@ function getPhoneRandomNumber()
 		
     local num = string.format("09%02d%03d%04d", numBase3, numBase0, numBase1)
 	return num
-end
+end]]--
 
 --- Exemple pour les numero du style 06XXXXXXXX
  --function getPhoneRandomNumber()
@@ -111,8 +119,9 @@ function getIdentifierByPhoneNumber(phone_number)
     if PhoneIdentifier[phone_number] ~= nil then
         return PhoneIdentifier[phone_number]
     else
+		phone_numberClear = phone_number:gsub( "%-", "")
         local result = MySQL.Sync.fetchAll("SELECT users.identifier FROM users WHERE users.phone_number = @phone_number", {
-            ['@phone_number'] = phone_number
+            ['@phone_number'] = phone_numberClear
         })
         if result[1] ~= nil and result[1].identifier ~= nil then
             PhoneIdentifier[phone_number] = result[1].identifier
@@ -280,7 +289,7 @@ function DeleteOldestMessages(phone)
     local messages_count = getMessagesCount(phone)
     if messages_count > 20 then
         local mustbedelete = messages_count - 20
-        MySQL.Sync.fetchAll("DELETE FROM phone_messages WHERE receiver = @receiver OR transmitter = @transmitter LIMIT " .. mustbedelete .. " ORDER by id ASC", {
+        MySQL.Sync.fetchAll("DELETE FROM phone_messages WHERE receiver = @receiver OR transmitter = @transmitter ORDER by id ASC LIMIT " .. mustbedelete .. "", {
             ['@receiver'] = phone,
             ['@transmitter'] = phone,
         })
@@ -447,7 +456,7 @@ function DeleteOldestCalls(phone)
     local calls_count = getCallsCount(phone)
     if calls_count > 20 then
         local mustbedelete = calls_count - 20
-        MySQL.Sync.fetchAll("DELETE FROM phone_calls WHERE owner = @owner OR num = @num LIMIT " .. mustbedelete .. " ORDER by id ASC", {
+        MySQL.Sync.fetchAll("DELETE FROM phone_calls WHERE owner = @owner OR num = @num ORDER by id ASC LIMIT " .. mustbedelete .. "", {
             ['@owner'] = phone,
             ['@num'] = phone,
         })
@@ -550,22 +559,30 @@ AddEventHandler('gcPhone:internal_startCall', function(source, phone_number, rtc
         rtcOffer = rtcOffer,
         extraData = extraData
     }
-
+	
     if GetItemCount(source, 'cartcharge') >= 100 then
         if is_valid == true then
             getSourceFromIdentifier(destPlayer, function (srcTo)
                 if srcTo ~= nill then
-                    xPlayer.removeInventoryItem('cartcharge', 100)
-                    AppelsEnCours[indexCall].receiver_src = srcTo
-                    TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
-                    TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
-                    TriggerClientEvent('gcPhone:waitingCall', srcTo, AppelsEnCours[indexCall], false)
+					if GetItemCount(srcTo, 'phone') >= 1 then
+						xPlayer.removeInventoryItem('cartcharge', 100)
+						AppelsEnCours[indexCall].receiver_src = srcTo
+						TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
+						TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
+						TriggerClientEvent('gcPhone:waitingCall', srcTo, AppelsEnCours[indexCall], false)
+					else
+						TriggerClientEvent("pNotify:SendNotification", source, { text = "دستگاه مشترک مورد نظر خاموش می باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
+						TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
+						TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
+					end
                 else
+					TriggerClientEvent("pNotify:SendNotification", source, { text = "مخاطب در دسترس نمی باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
                     TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
                     TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
                 end
             end)
         else
+			TriggerClientEvent("pNotify:SendNotification", source, { text = "مخاطب در دسترس نمی باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
             TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
             TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
         end
