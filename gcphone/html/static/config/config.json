@@ -199,6 +199,12 @@
       "routeName": "photo"
     },
     {
+      "name": "یادداشت ها",
+      "routeName": "notes",
+      "icons": "/html/static/img/icons_app/notes.png"
+
+    },
+    {
       "name": "9GAG",
       "icons": "/html/static/img/icons_app/9gag.png",
       "routeName": "9gag"

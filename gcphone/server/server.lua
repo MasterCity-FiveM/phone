@@ -185,6 +185,10 @@ function addContact(source, identifier, number, display)
         TriggerClientEvent("pNotify:SendNotification", source, { text = "حداکثر تعداد مخاطب قابل ثبت توسظ شما 10 مخاطب می باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
         return false
     end
+	
+	if display ~= nil then
+		display = number
+	end
 
     MySQL.Async.insert("INSERT INTO phone_users_contacts (`identifier`, `number`,`display`) VALUES(@identifier, @number, @display)", {
         ['@identifier'] = identifier,
@@ -626,9 +630,11 @@ AddEventHandler('gcPhone:acceptCall', function(infoCall, rtcAnswer)
             AppelsEnCours[id].is_accepts = true
             AppelsEnCours[id].rtcAnswer = rtcAnswer
             TriggerClientEvent('gcPhone:acceptCall', AppelsEnCours[id].transmitter_src, AppelsEnCours[id], true)
-	    SetTimeout(1000, function() -- change to +1000, if necessary.
-       		TriggerClientEvent('gcPhone:acceptCall', AppelsEnCours[id].receiver_src, AppelsEnCours[id], false)
-	    end)
+			SetTimeout(1000, function() -- change to +1000, if necessary.
+				if AppelsEnCours[id].receiver_src and AppelsEnCours[id] then 
+					TriggerClientEvent('gcPhone:acceptCall', AppelsEnCours[id].receiver_src, AppelsEnCours[id], false)
+				end
+			end)
             saveAppels(AppelsEnCours[id])
         end
     end

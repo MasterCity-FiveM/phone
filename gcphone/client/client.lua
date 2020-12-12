@@ -104,16 +104,42 @@ function IsCar()
 	return (vc >= 0 and vc <= 7) or (vc >= 9 and vc <= 12) or (vc >= 17 and vc <= 20)
 end
 
+isPolice = false
+
+Citizen.CreateThread(function()
+	while ESX == nil do
+		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+		Citizen.Wait(0)
+	end
+
+	while true do
+		if ESX.GetPlayerData().job ~= nil then
+			ESX.PlayerData = ESX.GetPlayerData()
+	
+			if ESX.PlayerData.job.name == 'police' then
+				isPolice = true
+			else
+				isPolice = false
+			end
+		end
+		Citizen.Wait(10000)
+	end
+end)
 
 Citizen.CreateThread(function()
   while true do
     Citizen.Wait(0)
     if not menuIsOpen and isDead then
       DisableControlAction(0, 288, true)
-      if not IsCar() then
+      if not IsRadarHidden() then
         DisplayRadar(false)
       end
+	elseif not menuIsOpen and not IsRadarHidden() and not IsCar() and not isPolice then
+		DisplayRadar(false)
+    elseif not menuIsOpen and IsRadarHidden() and (IsCar() or isPolice) then
+		DisplayRadar(true)
     end
+	
     if takePhoto ~= true then
       if IsControlJustPressed(1, Config.KeyOpenClose) then
         hasPhone(function (hasPhone)
@@ -125,9 +151,7 @@ Citizen.CreateThread(function()
         end)
       end
       if menuIsOpen == true then
-        if not IsCar() then
-          DisplayRadar(true)
-        end
+        DisplayRadar(true)
 
         for _, value in ipairs(KeyToucheCloseEvent) do
           if IsControlJustPressed(1, value.code) then
