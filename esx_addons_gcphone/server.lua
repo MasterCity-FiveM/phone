@@ -18,7 +18,8 @@ end)
 function notifyAlertSMS (number, alert, listSrc)
   if PhoneNumbers[number] ~= nil then
   local mess = 'From #' .. alert.numero  .. ' : ' .. alert.message
-
+	
+	
 	if alert.coords ~= nil then
     --mess = mess .. ' GPS: ' .. alert.coords.x .. ', ' .. alert.coords.y 
     mess = mess .. ''
@@ -27,13 +28,14 @@ function notifyAlertSMS (number, alert, listSrc)
     for k, _ in pairs(listSrc) do
       getPhoneNumber(tonumber(k), function (n)
         if n ~= nil then
-
 			TriggerEvent('gcPhone:_internalAddMessage', number, n, 'From #' .. alert.numero  .. ' : ' .. alert.message, 0, function (smsMess)
-            TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess)
-            TriggerEvent('gcPhone:_internalAddMessage', number, n, 'GPS: ' .. alert.coords.x .. ', ' .. alert.coords.y, 0, function (smsMess)
-              TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess)
-            end)
-          end)
+					TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess)
+					if alert.coords then
+						TriggerEvent('gcPhone:_internalAddMessage', number, n, 'GPS: ' .. alert.coords.x .. ', ' .. alert.coords.y, 0, function (smsMess)
+						  TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess)
+						end)
+					end
+			  end)
         end
       end)
     end
@@ -75,7 +77,7 @@ RegisterServerEvent('gcPhone:sendMessage')
 AddEventHandler('gcPhone:sendMessage', function(number, message)
     local sourcePlayer = tonumber(source)
     if PhoneNumbers[number] ~= nil then
-      getPhoneNumber(source, function (phone) 
+      getPhoneNumber(source, function (phone)
         notifyAlertSMS(number, {
           message = message,
           numero = phone,
