@@ -17,25 +17,24 @@ end)
 
 function notifyAlertSMS (number, alert, listSrc)
   if PhoneNumbers[number] ~= nil then
-  local mess = 'From #' .. alert.numero  .. ' : ' .. alert.message
+	if alert.notify_reciver and alert.sourceplayer then
+		TriggerEvent('gcPhone:_internalAddMessage', number, alert.numero, alert.message, 0, function (smsMess)
+			TriggerClientEvent("gcPhone:receiveMessage", tonumber(alert.sourceplayer), smsMess, false)
+		end)
+	end
 	
+	local mess = 'From #' .. alert.numero  .. ' : ' .. alert.message
 	
 	if alert.coords ~= nil then
-    --mess = mess .. ' GPS: ' .. alert.coords.x .. ', ' .. alert.coords.y 
-    mess = mess .. ''
-
+		mess = mess .. ' GPS: ' .. alert.coords.x .. ', ' .. alert.coords.y 
 	end
+	
     for k, _ in pairs(listSrc) do
       getPhoneNumber(tonumber(k), function (n)
         if n ~= nil then
-			TriggerEvent('gcPhone:_internalAddMessage', number, n, 'From #' .. alert.numero  .. ' : ' .. alert.message, 0, function (smsMess)
-					TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess)
-					if alert.coords then
-						TriggerEvent('gcPhone:_internalAddMessage', number, n, 'GPS: ' .. alert.coords.x .. ', ' .. alert.coords.y, 0, function (smsMess)
-						  TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess)
-						end)
-					end
-			  end)
+			TriggerEvent('gcPhone:_internalAddMessage', number, n, mess, 0, function (smsMess)
+				TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess, true)
+			end)
         end
       end)
     end
@@ -95,6 +94,24 @@ AddEventHandler('esx_addons_gcphone:startCall', function (number, message, coord
         message = message,
         coords = coords,
         numero = phone,
+      }, PhoneNumbers[number].sources)
+    end)
+  -- else
+  --   print('Appels sur un service non enregistre => numero : ' .. number)
+  end
+end)
+
+RegisterServerEvent('esx_addons_gcphone:startCallRecNotify')
+AddEventHandler('esx_addons_gcphone:startCallRecNotify', function (number, message, coords)
+  local source = source
+  if PhoneNumbers[number] ~= nil then
+    getPhoneNumber(source, function (phone) 
+      notifyAlertSMS(number, {
+        message = message,
+        coords = coords,
+        numero = phone,
+		notify_reciver = true,
+		sourceplayer = source
       }, PhoneNumbers[number].sources)
     end)
   -- else

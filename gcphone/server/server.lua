@@ -183,11 +183,14 @@ function addContact(source, identifier, number, display)
 
     if getContactsCount(identifier) >= 10 then
         TriggerClientEvent("pNotify:SendNotification", source, { text = "حداکثر تعداد مخاطب قابل ثبت توسظ شما 10 مخاطب می باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
-        return false
+        return
     end
 	
-	if display ~= nil then
-		display = number
+	local DisplayName
+	
+	if display == nil or number == nil then
+		TriggerClientEvent("pNotify:SendNotification", source, { text = "مشکلی در ثبت مخاطب داریم!", type = "error", timeout = 4000, layout = "bottomCenter"})
+        return
 	end
 
     MySQL.Async.insert("INSERT INTO phone_users_contacts (`identifier`, `number`,`display`) VALUES(@identifier, @number, @display)", {
@@ -319,27 +322,30 @@ function _internalAddMessage(transmitter, receiver, message, owner)
 end
 
 function addMessage(source, identifier, phone_number, message)
-    if GetItemCount(source, 'cartcharge') >= 16 then
-	    xPlayer = ESX.GetPlayerFromId(source)
-        xPlayer.removeInventoryItem('cartcharge', 16)
-        
-        local sourcePlayer = tonumber(source)
-        local otherIdentifier = getIdentifierByPhoneNumber(phone_number)
-        local myPhone = getNumberPhone(identifier)
-        if otherIdentifier ~= nil then
-            local tomess = _internalAddMessage(myPhone, phone_number, message, 0)
-            getSourceFromIdentifier(otherIdentifier, function (osou)
-                if tonumber(osou) ~= nil then 
-                    -- TriggerClientEvent("gcPhone:allMessage", osou, getMessages(otherIdentifier))
-                    TriggerClientEvent("gcPhone:receiveMessage", tonumber(osou), tomess)
-                end
-            end)
-        end
-        local memess = _internalAddMessage(phone_number, myPhone, message, 1)
-        TriggerClientEvent("gcPhone:receiveMessage", sourcePlayer, memess)
-    else
-        TriggerClientEvent("pNotify:SendNotification", source, { text = "شارژ سیم‌کارت کافی نیست، لطفا ابتدا کارت شارژ خریداری کنید.", type = "error", timeout = 4000, layout = "bottomCenter"})
-    end
+	
+	xPlayer = ESX.GetPlayerFromId(source)
+	
+	local sourcePlayer = tonumber(source)
+	local otherIdentifier = getIdentifierByPhoneNumber(phone_number)
+	local myPhone = getNumberPhone(identifier)
+	if otherIdentifier ~= nil then
+		if GetItemCount(source, 'cartcharge') < 6 and phone_number ~= 'police' and phone_number ~= 'ambulance' and Config.FixePhone[phone_number] ~= nil then
+			TriggerClientEvent("pNotify:SendNotification", source, { text = "شارژ سیم‌کارت کافی نیست، لطفا ابتدا کارت شارژ خریداری کنید.", type = "error", timeout = 4000, layout = "bottomCenter"})
+			return
+		else
+			xPlayer.removeInventoryItem('cartcharge', 6)
+		end
+		
+		local tomess = _internalAddMessage(myPhone, phone_number, message, 0)
+		getSourceFromIdentifier(otherIdentifier, function (osou)
+			if tonumber(osou) ~= nil then 
+				-- TriggerClientEvent("gcPhone:allMessage", osou, getMessages(otherIdentifier))
+				TriggerClientEvent("gcPhone:receiveMessage", tonumber(osou), tomess, true)
+			end
+		end)
+	end
+	local memess = _internalAddMessage(phone_number, myPhone, message, 1)
+	TriggerClientEvent("gcPhone:receiveMessage", sourcePlayer, memess, false)
 end
 
 function setReadMessageNumber(identifier, num)
@@ -564,37 +570,40 @@ AddEventHandler('gcPhone:internal_startCall', function(source, phone_number, rtc
         extraData = extraData
     }
 	
-    if GetItemCount(source, 'cartcharge') >= 100 then
-        if is_valid == true then
-            getSourceFromIdentifier(destPlayer, function (srcTo)
-                if srcTo ~= nill then
-					if GetItemCount(srcTo, 'phone') >= 1 then
-						xPlayer.removeInventoryItem('cartcharge', 100)
-						AppelsEnCours[indexCall].receiver_src = srcTo
+	if is_valid == true then
+		getSourceFromIdentifier(destPlayer, function (srcTo)
+			if srcTo ~= nill then
+				if GetItemCount(srcTo, 'phone') >= 1 then
+								
+					if GetItemCount(source, 'cartcharge') < 50 and phone_number ~= 'police' and phone_number ~= 'ambulance' and Config.FixePhone[phone_number] ~= nil then
+						TriggerClientEvent("pNotify:SendNotification", source, { text = "شارژ سیم‌کارت کافی نیست، لطفا ابتدا کارت شارژ خریداری کنید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 						TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
 						TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
-						TriggerClientEvent('gcPhone:waitingCall', srcTo, AppelsEnCours[indexCall], false)
+						return
 					else
-						TriggerClientEvent("pNotify:SendNotification", source, { text = "دستگاه مشترک مورد نظر خاموش می باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
-						TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
-						TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
+						xPlayer.removeInventoryItem('cartcharge', 50)
 					end
-                else
-					TriggerClientEvent("pNotify:SendNotification", source, { text = "مخاطب در دسترس نمی باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
-                    TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
-                    TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
-                end
-            end)
-        else
-			TriggerClientEvent("pNotify:SendNotification", source, { text = "مخاطب در دسترس نمی باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
-            TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
-            TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
-        end
-    else
-        TriggerClientEvent("pNotify:SendNotification", source, { text = "شارژ سیم‌کارت کافی نیست، لطفا ابتدا کارت شارژ خریداری کنید.", type = "error", timeout = 4000, layout = "bottomCenter"})
-        TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
-        TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
-    end
+					
+					AppelsEnCours[indexCall].receiver_src = srcTo
+					TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
+					TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
+					TriggerClientEvent('gcPhone:waitingCall', srcTo, AppelsEnCours[indexCall], false)
+				else
+					TriggerClientEvent("pNotify:SendNotification", source, { text = "دستگاه مشترک مورد نظر خاموش می باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
+					TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
+					TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
+				end
+			else
+				TriggerClientEvent("pNotify:SendNotification", source, { text = "مخاطب در دسترس نمی باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
+				TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
+				TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
+			end
+		end)
+	else
+		TriggerClientEvent("pNotify:SendNotification", source, { text = "مخاطب در دسترس نمی باشد.", type = "error", timeout = 4000, layout = "bottomCenter"})
+		TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
+		TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
+	end
 end)
 
 RegisterServerEvent('gcPhone:startCall')

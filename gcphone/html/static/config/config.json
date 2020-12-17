@@ -1,6 +1,6 @@
 {
   "reseau": "MCIT",
-  "warningMessageCount": 10,
+  "warningMessageCount": 500,
   "themeColor": "#007aff",
   "themeColorTitle": "#f7f7f7",
   "colors": [
@@ -93,24 +93,18 @@
     "value": "casa_papel.ogg"
   },
 
-  "serviceCall": [{
+  "serviceCall": [
+    {
       "display": "پلیس",
+      "backgroundColor": "blue",
       "icon": "/html/static/img/icons_app/policia.png",
       "subMenu": [{
-          "title": "ارسال پیام",
-          "eventName": "esx_addons_gcphone:call",
-          "type": {
-            "number": "police"
-          }
-        },
-        {
-          "title": "تماس اضطراری",
-          "eventName": "gcphone:autoCallNumber",
-          "type": {
-            "number": "911"
-          }
+        "title": "ارسال پیام",
+        "eventName": "esx_addons_gcphone:call",
+        "type": {
+          "number": "police"
         }
-      ]
+      }]
     },
     {
       "display": "بیمارستان",
@@ -199,12 +193,6 @@
       "routeName": "photo"
     },
     {
-      "name": "یادداشت ها",
-      "routeName": "notes",
-      "icons": "/html/static/img/icons_app/notes.png"
-
-    },
-    {
       "name": "9GAG",
       "icons": "/html/static/img/icons_app/9gag.png",
       "routeName": "9gag"
@@ -214,7 +202,7 @@
   "language": {
     "en_US": {
       "NAME": "فارسی",
-      "PHONE_WARNING_MESSAGE": "یاداشت ها",
+      "PHONE_WARNING_MESSAGE": "هشدار",
       "PHONE_WARNING_MESSAGE_MESS": "پیامها",
       "CONFIRM": "قبول",
       "CANCEL": "کنسل",
@@ -319,6 +307,7 @@
       "APP_DARKTCHAT_NEW_NOTE": "یادداشت جدید",
       "APP_DARKTCHAT_DELETE_NOTE": "حذف یادداشت",
       "APP_PHONE_NUMBER_UNKNOWN": "شماره ناشناس",
+	  "APP_MESSAGE_MESS_NUMBER" : "ارسال پیام به",
 
       "TIMEAGO": [
         "هم اکنون",

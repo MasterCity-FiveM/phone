@@ -332,9 +332,14 @@ AddEventHandler("gcPhone:getBourse", function(bourse)
 end)
 
 RegisterNetEvent("gcPhone:receiveMessage")
-AddEventHandler("gcPhone:receiveMessage", function(message)
+AddEventHandler("gcPhone:receiveMessage", function(message, playNotif)
   -- SendNUIMessage({event = 'updateMessages', messages = messages})
   SendNUIMessage({event = 'newMessage', message = message})
+  
+	if playNotif then
+		TriggerServerEvent('InteractSound_SV:PlayWithinDistance', 2.0, 'sms', 1)
+	end
+	
   table.insert(messages, message)
   if message.owner == 0 then
     local text = _U('new_message')
@@ -577,7 +582,6 @@ end)
 --  Gestion des evenements NUI
 --==================================================================================== 
 RegisterNUICallback('log', function(data, cb)
-  print(data)
   cb()
 end)
 RegisterNUICallback('focus', function(data, cb)
@@ -607,10 +611,26 @@ RegisterNUICallback('getMessages', function(data, cb)
   cb(json.encode(messages))
 end)
 RegisterNUICallback('sendMessage', function(data, cb)
+  local isGPS = false
+  
   if data.message == '%pos%' then
     local myPos = GetEntityCoords(PlayerPedId())
     data.message = 'GPS: ' .. myPos.x .. ', ' .. myPos.y
+	isGPS = true
+	TriggerServerEvent('gcPhone:sendMessage', data.phoneNumber, data.message)
+	return
   end
+  
+  if not isGPS and (data.phoneNumber == 'police' or data.phoneNumber == 'ambulance' or data.phoneNumber == 'taxi') then
+    local myPos = GetEntityCoords(PlayerPedId())
+	TriggerServerEvent('esx_addons_gcphone:startCallRecNotify', data.phoneNumber, data.message, {
+      x = myPos.x,
+      y = myPos.y
+    })
+	
+	return
+  end
+  
   TriggerServerEvent('gcPhone:sendMessage', data.phoneNumber, data.message)
 end)
 RegisterNUICallback('deleteMessage', function(data, cb)
