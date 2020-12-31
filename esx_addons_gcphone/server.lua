@@ -15,7 +15,7 @@ TriggerEvent('esx:getSharedObject', function(obj)
   ESX = obj
 end)
 
-function notifyAlertSMS (number, alert, listSrc)
+function notifyAlertSMS(number, alert, listSrc)
   if PhoneNumbers[number] ~= nil then
 	if alert.notify_reciver and alert.sourceplayer then
 		TriggerEvent('gcPhone:_internalAddMessage', number, alert.numero, alert.message, 0, function (smsMess)
@@ -29,15 +29,21 @@ function notifyAlertSMS (number, alert, listSrc)
 		mess = mess .. ' GPS: ' .. alert.coords.x .. ', ' .. alert.coords.y 
 	end
 	
-    for k, _ in pairs(listSrc) do
-      getPhoneNumber(tonumber(k), function (n)
-        if n ~= nil then
-			TriggerEvent('gcPhone:_internalAddMessage', number, n, mess, 0, function (smsMess)
-				TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess, true)
-			end)
-        end
-      end)
-    end
+	TriggerEvent('esx_service:getInServicePlayers',  function(inServiceUsers)
+		if inServiceUsers == nil then
+			return
+		end
+		
+		for k, _ in pairs(inServiceUsers) do
+			getPhoneNumber(tonumber(k), function (n)
+				if n ~= nil then
+					TriggerEvent('gcPhone:_internalAddMessage', number, n, mess, 0, function (smsMess)
+						TriggerClientEvent("gcPhone:receiveMessage", tonumber(k), smsMess, true)
+					end)
+				end
+			 end)
+		end
+	end, number)
   end
 end
 
