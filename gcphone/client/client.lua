@@ -66,8 +66,8 @@ end
 
 function HasBalance (cb)
   if (ESX == nil) then return cb(0) end
-  ESX.TriggerServerCallback('gcphone:getItemAmount', function(qtty)
-    cb(qtty)
+	  ESX.TriggerServerCallback('gcphone:getItemAmount', function(qtty)
+		cb(qtty)
   end, 'cartcharge')
 end
 
@@ -116,7 +116,7 @@ Citizen.CreateThread(function()
 		if ESX.GetPlayerData().job ~= nil then
 			ESX.PlayerData = ESX.GetPlayerData()
 	
-			if ESX.PlayerData.job.name == 'police' then
+			if ESX.PlayerData.job.name == 'police' or ESX.PlayerData.job.name == 'fbi' or ESX.PlayerData.job.name == 'sheriff' or ESX.PlayerData.job.name == 'dadsetani' then
 				isPolice = true
 			else
 				isPolice = false
@@ -621,7 +621,7 @@ RegisterNUICallback('sendMessage', function(data, cb)
 	return
   end
   
-  if not isGPS and (data.phoneNumber == 'police' or data.phoneNumber == 'ambulance' or data.phoneNumber == 'taxi') then
+  if not isGPS and (data.phoneNumber == 'police' or data.phoneNumber == 'ambulance' or data.phoneNumber == 'fbi' or data.phoneNumber == 'sheriff' or data.phoneNumber == 'dadsetani') then
     local myPos = GetEntityCoords(PlayerPedId())
 	TriggerServerEvent('esx_addons_gcphone:startCallRecNotify', data.phoneNumber, data.message, {
       x = myPos.x,

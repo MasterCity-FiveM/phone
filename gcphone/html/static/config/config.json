@@ -97,7 +97,7 @@
     {
       "display": "پلیس",
       "backgroundColor": "blue",
-      "icon": "/html/static/img/icons_app/policia.png",
+      "icon": "/html/static/img/icons_app/police.png",
       "subMenu": [{
         "title": "ارسال پیام",
         "eventName": "esx_addons_gcphone:call",
@@ -109,7 +109,7 @@
     {
       "display": "بیمارستان",
       "backgroundColor": "red",
-      "icon": "/html/static/img/icons_app/lsfd.png",
+      "icon": "/html/static/img/icons_app/medic.png",
       "subMenu": [{
         "title": "ارسال پیام",
         "eventName": "esx_addons_gcphone:call",
@@ -119,13 +119,38 @@
       }]
     },
     {
-      "display": "تاکسی",
-      "backgroundColor": "yellow",
+      "display": "کلانتری",
+      "backgroundColor": "green",
+      "icon": "/html/static/img/icons_app/sheriff.png",
       "subMenu": [{
         "title": "ارسال پیام",
         "eventName": "esx_addons_gcphone:call",
         "type": {
-          "number": "taxi"
+          "number": "sheriff"
+        }
+      }]
+    },
+	{
+      "display": "امنیت و اطلاعات",
+      "backgroundColor": "black",
+      "icon": "/html/static/img/icons_app/fbi.png",
+      "subMenu": [{
+        "title": "ارسال پیام",
+        "eventName": "esx_addons_gcphone:call",
+        "type": {
+          "number": "fbi"
+        }
+      }]
+    },
+	{
+      "display": "دادستانی",
+      "backgroundColor": "blue",
+      "icon": "/html/static/img/icons_app/dadsetani.png",
+      "subMenu": [{
+        "title": "ارسال پیام",
+        "eventName": "esx_addons_gcphone:call",
+        "type": {
+          "number": "dadsetani"
         }
       }]
     }
@@ -135,18 +160,31 @@
       "number": "ambulance",
       "display": "بیمارستان",
       "backgroundColor": "red",
-      "icon": "/html/static/img/icons_app/lsfd.png"
+      "icon": "/html/static/img/icons_app/medic.png"
     },
     {
       "number": "police",
       "display": "پلیس",
       "backgroundColor": "blue",
-      "icon": "/html/static/img/icons_app/policia.png"
+      "icon": "/html/static/img/icons_app/police.png"
     },
     {
-      "number": "taxi",
-      "display": "تاکسی",
-      "backgroundColor": "yellow"
+      "number": "sheriff",
+      "display": "کلانتری",
+      "backgroundColor": "blue",
+      "icon": "/html/static/img/icons_app/sheriff.png"
+    },
+    {
+      "number": "fbi",
+      "display": "امنیت و اطلاعات",
+      "backgroundColor": "black",
+      "icon": "/html/static/img/icons_app/fbi.png"
+    },
+    {
+      "number": "dadsetani",
+      "display": "دادستانی",
+      "backgroundColor": "blue",
+      "icon": "/html/static/img/icons_app/dadsetani.png"
     }
   ],
 

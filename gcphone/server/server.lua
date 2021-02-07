@@ -328,8 +328,9 @@ function addMessage(source, identifier, phone_number, message)
 	local sourcePlayer = tonumber(source)
 	local otherIdentifier = getIdentifierByPhoneNumber(phone_number)
 	local myPhone = getNumberPhone(identifier)
+
 	if otherIdentifier ~= nil then
-		if GetItemCount(source, 'cartcharge') < 6 and phone_number ~= 'police' and phone_number ~= 'ambulance' and Config.FixePhone[phone_number] ~= nil then
+		if GetItemCount(source, 'cartcharge') < 6 and phone_number ~= 'police' and phone_number ~= 'ambulance' and phone_number ~= 'fbi' and phone_number ~= 'sheriff' and phone_number ~= 'dadsetani' then
 			TriggerClientEvent("pNotify:SendNotification", source, { text = "شارژ سیم‌کارت کافی نیست، لطفا ابتدا کارت شارژ خریداری کنید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 			return
 		else
@@ -344,6 +345,7 @@ function addMessage(source, identifier, phone_number, message)
 			end
 		end)
 	end
+	
 	local memess = _internalAddMessage(phone_number, myPhone, message, 1)
 	TriggerClientEvent("gcPhone:receiveMessage", sourcePlayer, memess, false)
 end
@@ -574,8 +576,7 @@ AddEventHandler('gcPhone:internal_startCall', function(source, phone_number, rtc
 		getSourceFromIdentifier(destPlayer, function (srcTo)
 			if srcTo ~= nill then
 				if GetItemCount(srcTo, 'phone') >= 1 then
-								
-					if GetItemCount(source, 'cartcharge') < 50 and phone_number ~= 'police' and phone_number ~= 'ambulance' and Config.FixePhone[phone_number] ~= nil then
+					if GetItemCount(source, 'cartcharge') < 50 and phone_number ~= 'police' and phone_number ~= 'ambulance' and phone_number ~= 'sheriff' and phone_number ~= 'fbi' and phone_number ~= 'dadsetani' and Config.FixePhone[phone_number] == nil and Config.FixePhone[srcPhone] == nil then
 						TriggerClientEvent("pNotify:SendNotification", source, { text = "شارژ سیم‌کارت کافی نیست، لطفا ابتدا کارت شارژ خریداری کنید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 						TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
 						TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)

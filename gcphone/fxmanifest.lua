@@ -70,6 +70,12 @@ files {
 	'html/static/fonts/fontawesome-webfont.woff2',
 
 	'html/static/sound/*.ogg',
+	
+	'html/static/img/icons_app/police.png',
+	'html/static/img/icons_app/medic.png',
+	'html/static/img/icons_app/dadsetani.png',
+	'html/static/img/icons_app/sheriff.png',
+	'html/static/img/icons_app/fbi.png',
 
 }
 
