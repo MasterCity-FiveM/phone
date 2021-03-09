@@ -116,7 +116,7 @@ Citizen.CreateThread(function()
 		if ESX.GetPlayerData().job ~= nil then
 			ESX.PlayerData = ESX.GetPlayerData()
 	
-			if ESX.PlayerData.job.name == 'police' or ESX.PlayerData.job.name == 'fbi' or ESX.PlayerData.job.name == 'sheriff' or ESX.PlayerData.job.name == 'dadsetani' then
+			if ESX.PlayerData.job.name == 'police' or ESX.PlayerData.job.name == 'fbi' or ESX.PlayerData.job.name == 'sheriff' or ESX.PlayerData.job.name == 'dadsetani' or ESX.PlayerData.job.name == 'ambulance' or ESX.PlayerData.job.name == 'mechanic' then
 				isPolice = true
 			else
 				isPolice = false
