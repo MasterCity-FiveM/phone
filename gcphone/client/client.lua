@@ -714,6 +714,12 @@ RegisterNUICallback('closePhone', function(data, cb)
   cb()
 end)
 
+RegisterNetEvent('masterking32:closeAllUI')
+AddEventHandler('masterking32:closeAllUI', function() 
+	menuIsOpen = false
+	SendNUIMessage({show = false})
+	PhonePlayOut()
+end)
 ----------------------------------
 ---------- GESTION APPEL ---------
 ----------------------------------
