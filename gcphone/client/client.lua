@@ -270,13 +270,13 @@ Citizen.CreateThread(function ()
       showFixePhoneHelper(coords)
     end
     if inRangeToActivePhone == true and currentPlaySound == false then
-      PlaySoundJS('ring.ogg', 0.2 + (inRangedist - soundDistanceMax) / -soundDistanceMax * 0.8 )
+      PlaySoundJS('ring.ogg', 0.2 + (inRangedist - soundDistanceMax) / -soundDistanceMax * 0.3 )
       currentPlaySound = true
     elseif inRangeToActivePhone == true then
       mod = mod + 1
       if (mod == 15) then
         mod = 0
-        SetSoundVolumeJS('ring.ogg', 0.2 + (inRangedist - soundDistanceMax) / -soundDistanceMax * 0.8 )
+        SetSoundVolumeJS('ring.ogg', 0.2 + (inRangedist - soundDistanceMax) / -soundDistanceMax * 0.3 )
       end
     elseif inRangeToActivePhone == false and currentPlaySound == true then
       currentPlaySound = false
