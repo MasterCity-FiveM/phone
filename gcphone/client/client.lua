@@ -337,7 +337,7 @@ AddEventHandler("gcPhone:receiveMessage", function(message, playNotif)
   SendNUIMessage({event = 'newMessage', message = message})
   
 	if playNotif then
-		TriggerServerEvent('InteractSound_SV:PlayWithinDistance', 2.0, 'sms', 1)
+		TriggerServerEvent('InteractSound_SV:PlayOnSource', 'sms', 0.5)
 	end
 	
   table.insert(messages, message)

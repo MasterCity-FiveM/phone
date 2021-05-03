@@ -74,6 +74,7 @@ files {
 	'html/static/img/icons_app/police.png',
 	'html/static/img/icons_app/medic.png',
 	'html/static/img/icons_app/dadsetani.png',
+	'html/static/img/icons_app/mechanic.png',
 	'html/static/img/icons_app/sheriff.png',
 	'html/static/img/icons_app/fbi.png',
 

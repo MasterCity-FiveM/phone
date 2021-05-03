@@ -153,6 +153,18 @@
           "number": "dadsetani"
         }
       }]
+    },
+	{
+      "display": "مکانیکی",
+      "backgroundColor": "blue",
+      "icon": "/html/static/img/icons_app/mechanic.png",
+      "subMenu": [{
+        "title": "ارسال پیام",
+        "eventName": "esx_addons_gcphone:call",
+        "type": {
+          "number": "mechanic"
+        }
+      }]
     }
   ],
 
@@ -185,6 +197,12 @@
       "display": "دادستانی",
       "backgroundColor": "blue",
       "icon": "/html/static/img/icons_app/dadsetani.png"
+    },
+    {
+      "number": "mechanic",
+      "display": "مکانیکی",
+      "backgroundColor": "blue",
+      "icon": "/html/static/img/icons_app/mechanic.png"
     }
   ],
 
