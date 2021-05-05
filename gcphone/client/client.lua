@@ -129,16 +129,11 @@ end)
 Citizen.CreateThread(function()
   while true do
     Citizen.Wait(0)
+	
+    DisplayRadar(true)
     if not menuIsOpen and isDead then
       DisableControlAction(0, 288, true)
-      if not IsRadarHidden() then
-        DisplayRadar(false)
-      end
-	elseif not menuIsOpen and not IsRadarHidden() and not IsCar() and not isPolice then
-		DisplayRadar(false)
-    elseif not menuIsOpen and IsRadarHidden() and (IsCar() or isPolice) then
-		DisplayRadar(true)
-    end
+	end
 	
     if takePhoto ~= true then
       if IsControlJustPressed(1, Config.KeyOpenClose) then
@@ -151,8 +146,6 @@ Citizen.CreateThread(function()
         end)
       end
       if menuIsOpen == true then
-        DisplayRadar(true)
-
         for _, value in ipairs(KeyToucheCloseEvent) do
           if IsControlJustPressed(1, value.code) then
             SendNUIMessage({keyUp = value.event})
