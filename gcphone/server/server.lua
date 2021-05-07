@@ -330,11 +330,11 @@ function addMessage(source, identifier, phone_number, message)
 	local myPhone = getNumberPhone(identifier)
 
 	if otherIdentifier ~= nil then
-		if GetItemCount(source, 'cartcharge') < 6 and phone_number ~= 'police' and phone_number ~= 'ambulance' and phone_number ~= 'fbi' and phone_number ~= 'sheriff' and phone_number ~= 'dadsetani' then
+		if GetItemCount(source, 'cartcharge') < 1 and phone_number ~= 'police' and phone_number ~= 'ambulance' and phone_number ~= 'fbi' and phone_number ~= 'sheriff' and phone_number ~= 'dadsetani' then
 			TriggerClientEvent("pNotify:SendNotification", source, { text = "شارژ سیم‌کارت کافی نیست، لطفا ابتدا کارت شارژ خریداری کنید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 			return
-		else
-			xPlayer.removeInventoryItem('cartcharge', 6)
+		elseif phone_number ~= 'police' and phone_number ~= 'ambulance' and phone_number ~= 'fbi' and phone_number ~= 'sheriff' and phone_number ~= 'dadsetani' then
+			xPlayer.removeInventoryItem('cartcharge', 1)
 		end
 		
 		local tomess = _internalAddMessage(myPhone, phone_number, message, 0)
@@ -576,13 +576,13 @@ AddEventHandler('gcPhone:internal_startCall', function(source, phone_number, rtc
 		getSourceFromIdentifier(destPlayer, function (srcTo)
 			if srcTo ~= nill then
 				if GetItemCount(srcTo, 'phone') >= 1 then
-					if GetItemCount(source, 'cartcharge') < 50 and phone_number ~= 'police' and phone_number ~= 'ambulance' and phone_number ~= 'sheriff' and phone_number ~= 'fbi' and phone_number ~= 'dadsetani' and Config.FixePhone[phone_number] == nil and Config.FixePhone[srcPhone] == nil then
+					if GetItemCount(source, 'cartcharge') < 5 and phone_number ~= 'police' and phone_number ~= 'ambulance' and phone_number ~= 'sheriff' and phone_number ~= 'fbi' and phone_number ~= 'dadsetani' and Config.FixePhone[phone_number] == nil and Config.FixePhone[srcPhone] == nil then
 						TriggerClientEvent("pNotify:SendNotification", source, { text = "شارژ سیم‌کارت کافی نیست، لطفا ابتدا کارت شارژ خریداری کنید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 						TriggerEvent('gcPhone:addCall', AppelsEnCours[indexCall])
 						TriggerClientEvent('gcPhone:waitingCall', sourcePlayer, AppelsEnCours[indexCall], true)
 						return
-					else
-						xPlayer.removeInventoryItem('cartcharge', 50)
+					elseif phone_number ~= 'police' and phone_number ~= 'ambulance' and phone_number ~= 'sheriff' and phone_number ~= 'fbi' and phone_number ~= 'dadsetani' then
+						xPlayer.removeInventoryItem('cartcharge', 5)
 					end
 					
 					AppelsEnCours[indexCall].receiver_src = srcTo
