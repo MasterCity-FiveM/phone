@@ -1,5 +1,5 @@
 client_script {
-	"client.lua"
+	"client/*.lua"
 }
 
 server_script {

@@ -84,10 +84,7 @@ client_script {
 	"@es_extended/locale.lua",
 	"locales/en.lua",
 	"config.lua",
-	"client/animation.lua",
-	"client/client.lua",
-	"client/photo.lua",
-	"client/bank.lua"
+	"client/*.lua",
 }
 
 server_script {
