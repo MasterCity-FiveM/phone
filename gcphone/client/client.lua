@@ -111,63 +111,44 @@ Citizen.CreateThread(function()
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 		Citizen.Wait(0)
 	end
-
-	while true do
-		if ESX.GetPlayerData().job ~= nil then
-			ESX.PlayerData = ESX.GetPlayerData()
-	
-			if ESX.PlayerData.job.name == 'police' or ESX.PlayerData.job.name == 'fbi' or ESX.PlayerData.job.name == 'sheriff' or ESX.PlayerData.job.name == 'dadsetani' or ESX.PlayerData.job.name == 'ambulance' or ESX.PlayerData.job.name == 'mechanic' then
-				isPolice = true
-			else
-				isPolice = false
-			end
-		end
-		Citizen.Wait(10000)
-	end
 end)
 
-Citizen.CreateThread(function()
-  while true do
-    Citizen.Wait(0)
-	
-    DisplayRadar(true)
-    if not menuIsOpen and isDead then
+
+RegisterNetEvent('master_keymap:f1')
+AddEventHandler('master_keymap:f1', function()
+	if not menuIsOpen and isDead then
       DisableControlAction(0, 288, true)
 	end
 	
-    if takePhoto ~= true then
-      if IsControlJustPressed(1, Config.KeyOpenClose) then
-        hasPhone(function (hasPhone)
-          if hasPhone == true then
-            TooglePhone()
-          else
-            ShowNoPhoneWarning()
-          end
-        end)
-      end
-      if menuIsOpen == true then
-        for _, value in ipairs(KeyToucheCloseEvent) do
-          if IsControlJustPressed(1, value.code) then
-            SendNUIMessage({keyUp = value.event})
-          end
-        end
-        if useMouse == true and hasFocus == ignoreFocus then
-          local nuiFocus = not hasFocus
-          SetNuiFocus(nuiFocus, nuiFocus)
-          hasFocus = nuiFocus
-        elseif useMouse == false and hasFocus == true then
-          SetNuiFocus(false, false)
-          hasFocus = false
-        end
-      else
-        if hasFocus == true then
-          SetNuiFocus(false, false)
-          hasFocus = false
-        end
-      end
-    end
-  end
+	hasPhone(function (hasPhone)
+		if hasPhone == true then
+			TooglePhone()
+			
+			Citizen.CreateThread(function ()
+				while menuIsOpen do
+					Citizen.Wait(0)
+					for _, value in ipairs(KeyToucheCloseEvent) do
+						if IsControlJustPressed(1, value.code) then
+							SendNUIMessage({keyUp = value.event})
+						end
+					end
+					
+					if useMouse == true and hasFocus == ignoreFocus then
+						local nuiFocus = not hasFocus
+						SetNuiFocus(nuiFocus, nuiFocus)
+						hasFocus = nuiFocus
+					elseif useMouse == false and hasFocus == true then
+						SetNuiFocus(false, false)
+						hasFocus = false
+					end
+				end
+			end)
+		else
+			ShowNoPhoneWarning()
+		end
+	end)
 end)
+
 
 
 
@@ -743,45 +724,4 @@ end)
 RegisterNUICallback('setIgnoreFocus', function (data, cb)
   ignoreFocus = data.ignoreFocus
   cb()
-end)
-
-RegisterNUICallback('takePhoto', function(data, cb)
-	CreateMobilePhone(1)
-  CellCamActivate(true, true)
-  takePhoto = true
-  Citizen.Wait(0)
-  if hasFocus == true then
-    SetNuiFocus(false, false)
-    hasFocus = false
-  end
-	while takePhoto do
-    Citizen.Wait(0)
-
-		if IsControlJustPressed(1, 27) then -- Toogle Mode
-			frontCam = not frontCam
-			CellFrontCamActivate(frontCam)
-    elseif IsControlJustPressed(1, 177) then -- CANCEL
-      DestroyMobilePhone()
-      CellCamActivate(false, false)
-      cb(json.encode({ url = nil }))
-      takePhoto = false
-      break
-    elseif IsControlJustPressed(1, 176) then -- TAKE.. PIC
-			exports['screenshot-basic']:requestScreenshotUpload(data.url, data.field, function(data)
-        local resp = json.decode(data)
-        DestroyMobilePhone()
-        CellCamActivate(false, false)
-        cb(json.encode({ url = resp.files[1].url }))
-      end)
-      takePhoto = false
-		end
-		HideHudComponentThisFrame(7)
-		HideHudComponentThisFrame(8)
-		HideHudComponentThisFrame(9)
-		HideHudComponentThisFrame(6)
-		HideHudComponentThisFrame(19)
-    HideHudAndRadarThisFrame()
-  end
-  Citizen.Wait(1000)
-  PhonePlayAnim('text', false, true)
 end)
