@@ -118,42 +118,6 @@
         }
       }]
     },
-    {
-      "display": "کلانتری",
-      "backgroundColor": "green",
-      "icon": "/html/static/img/icons_app/sheriff.png",
-      "subMenu": [{
-        "title": "ارسال پیام",
-        "eventName": "esx_addons_gcphone:call",
-        "type": {
-          "number": "sheriff"
-        }
-      }]
-    },
-	{
-      "display": "امنیت و اطلاعات",
-      "backgroundColor": "black",
-      "icon": "/html/static/img/icons_app/fbi.png",
-      "subMenu": [{
-        "title": "ارسال پیام",
-        "eventName": "esx_addons_gcphone:call",
-        "type": {
-          "number": "fbi"
-        }
-      }]
-    },
-	{
-      "display": "دادستانی",
-      "backgroundColor": "blue",
-      "icon": "/html/static/img/icons_app/dadsetani.png",
-      "subMenu": [{
-        "title": "ارسال پیام",
-        "eventName": "esx_addons_gcphone:call",
-        "type": {
-          "number": "dadsetani"
-        }
-      }]
-    },
 	{
       "display": "مکانیکی",
       "backgroundColor": "blue",
@@ -179,24 +143,6 @@
       "display": "پلیس",
       "backgroundColor": "blue",
       "icon": "/html/static/img/icons_app/police.png"
-    },
-    {
-      "number": "sheriff",
-      "display": "کلانتری",
-      "backgroundColor": "blue",
-      "icon": "/html/static/img/icons_app/sheriff.png"
-    },
-    {
-      "number": "fbi",
-      "display": "امنیت و اطلاعات",
-      "backgroundColor": "black",
-      "icon": "/html/static/img/icons_app/fbi.png"
-    },
-    {
-      "number": "dadsetani",
-      "display": "دادستانی",
-      "backgroundColor": "blue",
-      "icon": "/html/static/img/icons_app/dadsetani.png"
     },
     {
       "number": "mechanic",
